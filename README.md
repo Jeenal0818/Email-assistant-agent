@@ -1,134 +1,187 @@
-# Email Assistant Automation System
+# Email Assistant Agent
 
-A fully automated Gmail–Calendar assistant built in Python that can:
+An autonomous AI email agent that transforms unstructured emails into executable actions using LLM reasoning, IMAP/SMTP protocols, and Google Calendar APIs.
 
-- Send emails using Gmail SMTP
-- Understand natural language commands ("send mail to X with subject Y saying Z")
-- Read and clean incoming emails
-- Detect meeting-related emails
-- Extract dates/times intelligently
-- Automatically add events to Google Calendar
-- Safely delete emails with exact subject match
-- Search Inbox / Sent / All Mail efficiently
+The system ingests emails, identifies user intent, extracts temporal information, schedules meetings, sends emails, manages inbox operations, and automates end-to-end email workflows.
 
-------------------------------------------------------------
+---
+
+## System Architecture
+
+```text
+                     Incoming Emails
+                           │
+                           ▼
+                  IMAP Email Ingestion
+                           │
+                           ▼
+                Email Cleaning & Parsing
+                           │
+                           ▼
+                 LLM Reasoning Pipeline
+          ┌────────────┼────────────┐
+          │            │            │
+          ▼            ▼            ▼
+ Intent Detection  Entity Extraction  Time Parsing
+          │            │            │
+          └────────────┴────────────┘
+                       │
+                       ▼
+              Decision & Action Engine
+          ┌────────────┼────────────┐
+          ▼            ▼            ▼
+ Google Calendar   Email Sender   Inbox Actions
+```
+
+---
+
+## Features
+
+- Autonomous email ingestion via IMAP
+- LLM-powered intent and entity extraction
+- Natural language date & time understanding
+- Automatic Google Calendar event creation
+- SMTP-based email composition and delivery
+- Email search and deletion utilities
+- Modular architecture for extending agent capabilities
+
+---
+
+## Tech Stack
+
+- Python
+- OpenAI API
+- IMAP / SMTP
+- Google Calendar API
+- Google OAuth 2.0
+- DateParser
+- python-dotenv
+
+---
 
 ## Project Structure
 
-    Email Assistant/
-    │
-    ├── main.py                   # Runs the meeting → calendar workflow
-    ├── calendar_agent.py         # Extracts meetings and creates calendar events
-    ├── email_tools.py            # Send, read, clean, parse emails
-    ├── delete_mail.py            # Safe, exact-match deletion logic
-    ├── token.json                # Auto-created after OAuth login
-    ├── credentials.json          # Google OAuth client credentials
-    ├── .env                      # Secret credentials for Gmail login
-    └── README.md                 # Documentation
+```text
+Email-assistant-agent/
 
-------------------------------------------------------------
+├── main.py
+├── calendar_agent.py
+├── email_tools.py
+├── delete_mail.py
+├── credentials.json
+├── token.json
+├── requirements.txt
+└── README.md
+```
 
-## Environment Setup
+---
 
-Create a `.env` file with:
+## Workflow
 
-    EMAIL_ADDRESS=your_email@gmail.com
-    EMAIL_PASSWORD=your_app_password
-    IMAP_HOST=imap.gmail.com
+### 1. Email Ingestion
 
-Use a Gmail App Password  
-Enable IMAP in Gmail settings
+- Connects securely to Gmail via IMAP
+- Retrieves incoming emails
+- Cleans and preprocesses email content
 
-------------------------------------------------------------
+### 2. LLM Reasoning
+
+The agent extracts:
+
+- User intent
+- Meeting participants
+- Date & time
+- Subject
+- Actionable context
+
+### 3. Action Execution
+
+Based on extracted intent, the agent can:
+
+- Create Google Calendar events
+- Send emails
+- Search inbox
+- Delete emails
+
+### 4. Calendar Automation
+
+Meeting requests are automatically converted into structured Google Calendar events with validated timestamps.
+
+---
 
 ## Installation
 
-Run:
+```bash
+git clone https://github.com/Jeenal0818/Email-assistant-agent.git
 
-    pip install python-dotenv google-api-python-client google-auth-oauthlib google-auth-httplib2 dateparser python-dateutil
+cd Email-assistant-agent
 
-------------------------------------------------------------
+pip install -r requirements.txt
+```
+
+---
+
+## Environment Variables
+
+Create a `.env` file:
+
+```env
+EMAIL_ADDRESS=your_email@gmail.com
+EMAIL_PASSWORD=your_app_password
+
+IMAP_HOST=imap.gmail.com
+
+OPENAI_API_KEY=your_openai_api_key
+```
+
+---
 
 ## Google Calendar Setup
 
-1. Enable Google Calendar API in Google Cloud  
-2. Create OAuth Client ID → Desktop App  
-3. Save `credentials.json` into project folder  
-4. Authenticate:
+1. Enable the Google Calendar API.
+2. Create OAuth Desktop credentials.
+3. Download `credentials.json`.
+4. Place it in the project root.
+5. Run the application.
 
-       python main.py
+```bash
+python main.py
+```
 
-This creates `token.json` automatically.
+The first execution generates a `token.json` file for authentication.
 
-------------------------------------------------------------
+---
 
-## Run the Meeting-to-Calendar Agent
+## Example
 
-    python main.py
+**Input Email**
 
-This executes:
+> Let's meet next Tuesday at 4 PM to discuss the quarterly roadmap.
 
-    from calendar_agent import process_meeting_emails
-    process_meeting_emails()
+**Agent Actions**
 
-The agent will:
+- Detects meeting intent
+- Extracts date and time
+- Creates a Google Calendar event
+- Confirms successful scheduling
 
-- Read latest 10 emails  
-- Skip newsletters/promotions/MBA trash  
-- Detect meeting-related mails  
-- Extract datetime  
-- Add event to Google Calendar  
+---
 
-------------------------------------------------------------
+## Engineering Highlights
 
-## Send Email Using Natural Language
+- Architected an autonomous email workflow that combines LLM reasoning with IMAP/SMTP and Google Calendar APIs to execute user actions from natural-language emails.
+- Built a modular agent pipeline separating email ingestion, reasoning, and action execution, enabling scalable extension of new agent capabilities.
+- Implemented structured temporal extraction and intent classification to convert unstructured emails into executable calendar and email operations.
 
-    from email_tools import handle_email_command
-    handle_email_command("Send mail to test@example.com with subject dinner saying let's meet tomorrow at 7 pm")
+---
 
-------------------------------------------------------------
+## Future Improvements
 
-## Delete Email by Exact Subject (Safe)
+- Multi-agent architecture for specialized email tasks
+- Retrieval-Augmented Generation (RAG) for long email threads
+- Memory layer for personalized scheduling preferences
+- Function-calling support for dynamic tool selection
+- Slack, Outlook, and Microsoft Teams integrations
+- Calendar conflict detection and intelligent meeting rescheduling
 
-    from delete_mail import delete_email_exact
-    delete_email_exact("Lunch")
-
-- Searches Inbox / Sent / All Mail  
-- Exact subject match only  
-- Moves to Trash (never permanently deletes)  
-
-------------------------------------------------------------
-
-## Core Features
-
-### Smart Email Cleaning
-Removes:
-- HTML
-- URLs
-- Extra whitespace
-
-### Smart Meeting Detection
-Ignore keywords:
-newsletter, mba, convocation, highlights, recap, promo, digest, update, tutorial, offer, placement, alumni…
-
-Meeting keywords:
-meeting, schedule, call, appointment, invite, zoom, google meet, discussion, reminder, event…
-
-### Smart Date Extraction
-Understands:
-- "tomorrow at 6:30 pm"
-- "next Monday 10am"
-- "today at 4pm"
-- "12 Feb 2025"
-- "15/02/2025"
-- "tonight 8pm"
-
-Converted to Asia/Kolkata timezone.
-
-### Safe Folder Handling
-- Prefers All Mail  
-- Falls back to INBOX  
-- Delete script identifies Trash/Bin safely  
-
-------------------------------------------------------------
-
+---
